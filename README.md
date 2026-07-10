@@ -107,7 +107,7 @@ Built on the **NXP LPC2148 ARM7TDMI-S** microcontroller, ColdGuard provides:
 
 <!-- 📌 INSTRUCTION: Replace the path below with your actual hardware board image -->
 <!-- Example: ![Hardware Board](images/hardware_board.jpg) -->
-![Full Hardware Board](images/hardware_board.jpeg)
+<img src="images/hardware_board.jpeg" alt="Full Hardware Board" width="700"/>
 
 ---
 
@@ -117,7 +117,16 @@ Built on the **NXP LPC2148 ARM7TDMI-S** microcontroller, ColdGuard provides:
 
 <!-- 📌 INSTRUCTION: Replace the path below with your actual display image -->
 <!-- Example: ![LCD Display](images/lcd_display.jpg) -->
-![LCD Display Output](images/display.jpeg)
+<img src="images/display.jpeg" alt="LCD Display Output" width="700"/>
+
+---
+
+### 3. ThingSpeak IoT Dashboard
+
+> *Live ThingSpeak channel showing real-time graphs for temperature (field1), humidity (field2), door status (field3), and alarm code (field4) — data uploaded every 60 seconds via the ESP-01 Wi-Fi module.*
+
+<!-- 📌 INSTRUCTION: Save your ThingSpeak dashboard screenshot as:  images/thingspeak_dashboard.png  then push to GitHub -->
+<img src="images/thingspeak_dashboard.png" alt="ThingSpeak Dashboard" width="700"/>
 
 ---
 
