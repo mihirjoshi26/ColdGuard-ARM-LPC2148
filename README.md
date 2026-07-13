@@ -10,7 +10,7 @@
 # 🧊 ColdGuard: IoT-Based Cold Storage Monitoring System
 
 <p align="center">
-  <strong>🌡️ Real-time IoT-enabled monitoring system for cold storage environments</strong><br/>
+  <strong>🌡️ Continuous IoT-enabled monitoring system for cold storage environments</strong><br/>
   <em>Built on ARM7 (NXP LPC2148) • DHT11 Sensor • ESP-01 Wi-Fi • ThingSpeak Cloud Dashboard</em>
 </p>
 
@@ -47,7 +47,7 @@ Built on the **NXP LPC2148 ARM7TDMI-S** microcontroller, ColdGuard provides:
 - ✅ **Door-open tracking** with countdown timer and configurable timeout
 - ✅ **Cloud-based remote monitoring** via ThingSpeak IoT dashboard
 - ✅ **Password-protected configuration** stored in non-volatile EEPROM
-- ✅ **Real-time LCD feedback** with flicker-free display updates
+- ✅ **Instantaneous LCD feedback** with flicker-free display updates
 
 ### 🔧 System Specifications
 
@@ -73,8 +73,8 @@ Built on the **NXP LPC2148 ARM7TDMI-S** microcontroller, ColdGuard provides:
 | Feature | Description |
 |---------|-------------|
 | 🌡️ **Temperature Monitoring** | DHT11 sensor sampled every 1 second with configurable setpoint (0–50 °C) |
-| 💧 **Humidity Monitoring** | Simultaneous humidity tracking with configurable setpoint (20–95 %RH) |
-| 📟 **Live LCD Dashboard** | Real-time display: `T:24°C    RH:58%` — full-width justified, no clear-and-redraw flicker |
+| 💧 **Humidity Monitoring** | Simultaneous humidity tracking with configurable setpoint (20–90 %RH) |
+| 📟 **Live LCD Dashboard** | Live sensor feed: `T:24°C    RH:58%` — full-width justified, no clear-and-redraw flicker |
 
 ### Alert & Safety
 | Feature | Description |
@@ -111,7 +111,7 @@ Built on the **NXP LPC2148 ARM7TDMI-S** microcontroller, ColdGuard provides:
 
 ### 2. LCD Display Output
 
-> *ColdGuard running in monitoring mode — LCD shows real-time temperature, humidity, setpoint values, and door status.*
+> *ColdGuard running in monitoring mode — LCD shows live temperature, humidity, setpoint values, and door status.*
 
 <img src="images/display.jpeg" alt="LCD Display Output" width="700"/>
 
@@ -119,7 +119,7 @@ Built on the **NXP LPC2148 ARM7TDMI-S** microcontroller, ColdGuard provides:
 
 ### 3. ThingSpeak IoT Dashboard
 
-> *Live ThingSpeak channel showing real-time graphs for temperature (field1), humidity (field2), door status (field3), and alarm code (field4) — data uploaded every 60 seconds via the ESP-01 Wi-Fi module.*
+> *Live ThingSpeak channel showing continuous graphs for temperature (field1), humidity (field2), door status (field3), and alarm code (field4) — data uploaded every 60 seconds via the ESP-01 Wi-Fi module.*
 
 <img src="images/thingspeak_dashboard.png" alt="ThingSpeak Dashboard" width="700"/>
 
@@ -131,7 +131,7 @@ Built on the **NXP LPC2148 ARM7TDMI-S** microcontroller, ColdGuard provides:
 
 | # | Component | Model / Specification | Interface | Qty |
 |:-:|-----------|----------------------|-----------|:---:|
-| 1 | **Microcontroller** | NXP LPC2148 (ARM7TDMI-S, 60 MHz, 512 KB Flash, 32 KB RAM) | — | 1 |
+| 1 | **Microcontroller** | NXP LPC2148 (ARM7TDMI-S, 60 MHz, 512 KB Flash, 32+8 KB SRAM) | — | 1 |
 | 2 | **Temp & Humidity Sensor** | DHT11 (0–50 °C / 20–90 %RH, single-wire protocol) | GPIO (P0.4) | 1 |
 | 3 | **Character LCD** | 16×2 HD44780-compatible (8-bit parallel mode) | 8-bit GPIO | 1 |
 | 4 | **Wi-Fi Module** | ESP-01 (ESP8266, 802.11 b/g/n, AT-command firmware) | UART0 @ 9600 | 1 |
@@ -142,7 +142,7 @@ Built on the **NXP LPC2148 ARM7TDMI-S** microcontroller, ColdGuard provides:
 | 9 | **Menu Button** | Tactile push button (momentary, NO) | EINT3 (P0.20) | 1 |
 | 10 | **Crystal Oscillator** | 12 MHz HC49 quartz crystal + 22 pF load capacitors | XTAL1/XTAL2 | 1 |
 | 11 | **Voltage Regulators** | LM7805 (5V, 1A) + AMS1117-3.3 (3.3V for ESP-01) | — | 1 each |
-| 12 | **Pull-up Resistors** | 4.7 kΩ (I2C SDA/SCL, DHT11 data line) | — | 3 |
+| 12 | **Pull-up Resistors** | 4.7 kΩ (DHT11 data line) | — | 1 |
 | 13 | **Contrast Pot** | 10 kΩ trimmer potentiometer (LCD VO adjustment) | — | 1 |
 | 14 | **Decoupling Caps** | 100 nF ceramic (per IC VCC pin) + 10 µF electrolytic | — | as needed |
 
@@ -154,7 +154,7 @@ Built on the **NXP LPC2148 ARM7TDMI-S** microcontroller, ColdGuard provides:
 
 The LPC2148 clock tree is configured in `Startup.s` and `main.c`:
 
-<img src="images/System Clock Configuration.png" alt="System Clock Configuration" width="700"/>
+<img src="images/system_clock_configuration.png" alt="System Clock Configuration" width="700"/>
 
 ---
 
@@ -166,8 +166,8 @@ The LPC2148 clock tree is configured in `Startup.s` and `main.c`:
 |:---:|:------------------:|--------|-------------|:---------:|-------|
 | P0.0 | TXD0 | UART0 TX | ESP-01 RX | OUT | 3.3V level shift required |
 | P0.1 | RXD0 | UART0 RX | ESP-01 TX | IN | 3.3V level shift required |
-| P0.2 | SCL0 | I2C0 Clock | AT24C256 SCL | OD | 4.7 kΩ pull-up to VCC |
-| P0.3 | SDA0 | I2C0 Data | AT24C256 SDA | OD | 4.7 kΩ pull-up to VCC |
+| P0.2 | SCL0 | I2C0 Clock | AT24C256 SCL | OD | Uses AT24C256 onboard pull-up |
+| P0.3 | SDA0 | I2C0 Data | AT24C256 SDA | OD | Uses AT24C256 onboard pull-up |
 | P0.4 | — | DHT11 Data | DHT11 DATA | I/O | 4.7 kΩ pull-up, single-wire |
 | P0.7 | EINT2 | Door IRQ | Reed Switch → GND | IN | Active-LOW, edge-triggered |
 | P0.8 | — | LCD D0 | LCD pin 7 | OUT | 8-bit data bus (LSB) |
@@ -275,7 +275,7 @@ All user-adjustable settings are defined in [`config.h`](config.h):
 | Macro | Default | Range | Description |
 |-------|:-------:|:-----:|-------------|
 | `DEFAULT_TEMP_SETPOINT` | 35 °C | 0–50 | Temperature alarm trigger point |
-| `DEFAULT_HUMIDITY_SETPOINT` | 65 %RH | 20–95 | Humidity alarm trigger point |
+| `DEFAULT_HUMIDITY_SETPOINT` | 65 %RH | 20–90 | Humidity alarm trigger point |
 | `DOOR_OPEN_ALERT_SECONDS` | 15 s | — | Door open duration before alarm |
 | `SENSOR_SAMPLE_DELAY_MS` | 1000 ms | ≥1000 | DHT11 sample interval (min 1s per datasheet) |
 
@@ -320,7 +320,7 @@ The configuration menu is hardware-gated behind an external interrupt and softwa
 | Option | Input Range | Stored In | Notes |
 |--------|:-----------:|-----------|-------|
 | Temperature Setpoint | 0 – 50 °C | EEPROM + RAM | Immediate effect on alarm logic |
-| Humidity Setpoint | 20 – 95 %RH | EEPROM + RAM | Immediate effect on alarm logic |
+| Humidity Setpoint | 20 – 90 %RH | EEPROM + RAM | Immediate effect on alarm logic |
 | Change Password | 4 digits | EEPROM + RAM | New PIN required on next menu access |
 
 ---
@@ -387,9 +387,18 @@ coldguard/
 │
 ├── 📄 README.md                 ← This file
 │
-├── 🖼️ images/                   ← Project photos
-│   ├── hardware_board.jpg       ← Full hardware assembly
-│   └── display.jpg              ← LCD display output
+├── 🖼️ images/                   ← Project photos & diagrams
+│   ├── hardware_board.jpeg             ← Full hardware assembly
+│   ├── display.jpeg                    ← LCD display output
+│   ├── thingspeak_dashboard.png        ← ThingSpeak channel UI
+│   ├── system_clock_configuration.png  ← PLL & clock tree block
+│   ├── circuit_block_diagram.png       ← Interconnection map
+│   ├── data_flow_summary.png           ← Data movement flow
+│   ├── software_architecture.png       ← Firmware layer diagram
+│   ├── main_loop_state_machine.png     ← Core execution loop
+│   ├── door_event_protocol.png         ← Event timing protocol
+│   ├── lcd_display_states.png          ← Screen layout maps
+│   └── menu_password_system.png        ← Security & config flowchart
 │
 ├── ⚙️ Core Application
 │   ├── main.c                   ← Entry point, Init_All(), main loop
@@ -456,7 +465,7 @@ coldguard/
 
 ## 📄 License
 
-This project is developed for **academic and educational purposes** as part of a Major Project in ARM Embedded Systems.
+This project is developed for **academic purposes** as part of a Major Project in ARM Embedded Systems.
 
 ---
 
