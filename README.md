@@ -1,4 +1,4 @@
-<p align="center">
+﻿<p align="center">
   <img src="https://img.shields.io/badge/MCU-LPC2148-blue?style=for-the-badge&logo=arm&logoColor=white" alt="MCU Badge"/>
   <img src="https://img.shields.io/badge/Sensor-DHT11-green?style=for-the-badge" alt="Sensor Badge"/>
   <img src="https://img.shields.io/badge/WiFi-ESP--01-orange?style=for-the-badge&logo=espressif&logoColor=white" alt="WiFi Badge"/>
@@ -74,7 +74,7 @@ Built on the **NXP LPC2148 ARM7TDMI-S** microcontroller, ColdGuard provides:
 |---------|-------------|
 | 🌡️ **Temperature Monitoring** | DHT11 sensor sampled every 1 second with configurable setpoint (0–50 °C) |
 | 💧 **Humidity Monitoring** | Simultaneous humidity tracking with configurable setpoint (20–95 %RH) |
-| 📟 **Live LCD Dashboard** | Real-time display: `T:24°C/35 H:58%` — no clear-and-redraw flicker |
+| 📟 **Live LCD Dashboard** | Real-time display: `T:24°C    RH:58%` — full-width justified, no clear-and-redraw flicker |
 
 ### Alert & Safety
 | Feature | Description |
@@ -363,98 +363,11 @@ The LPC2148 clock tree is configured in `Startup.s` and `main.c`:
 
 > **Complete system interconnection diagram showing all modules, communication buses, and data flow.**
 
-```
- ═══════════════════════════════════════════════════════════════════════════════════
- ║                          COLDGUARD SYSTEM BLOCK DIAGRAM                        ║
- ═══════════════════════════════════════════════════════════════════════════════════
-
-                              ┌─────────────────────┐
-                              │    POWER SUPPLY     │
-                              │                     │
-                              │  VIN (7-12V DC)     │
-                              │    │         │      │
-                              │  ┌─▼──┐   ┌──▼───┐  │
-                              │  │7805│   │1117  │  │
-                              │  │    │   │ 3.3  │  │
-                              │  └─┬──┘   └──┬───┘  │
-                              │    │         │      │
-                              │  +5V       +3.3V    │
-                              └────┬─────────┬──────┘
-                                   │         │
-          ┌────────────────────────┼─────────┼───────────────────────┐
-          │                        │         │                       │
-          │    ╔═══════════════════╧═════════╧══════════════════╗    │
-          │    ║                                                ║    │
-          │    ║           ╔═══════════════════════╗            ║    │
-          │    ║           ║      LPC2148          ║            ║    │
-          │    ║           ║   ARM7TDMI-S Core     ║            ║    │
-          │    ║           ║     60 MHz CCLK       ║            ║    │
-          │    ║           ║     15 MHz PCLK       ║            ║    │
-          │    ║           ║                       ║            ║    │
-          │    ║           ║  512 KB Flash         ║            ║    │
-          │    ║           ║   32 KB SRAM          ║            ║    │
-          │    ║           ╚═══════════════════════╝            ║    │
-          │    ║                                                ║    │
-          │    ╚════════════════════════════════════════════════╝    │
-          │         │        │       │       │       │      │        │
-          │         │        │       │       │       │      │        │
-          │    ┌────┘   ┌────┘  ┌────┘  ┌────┘   ┌───┘  ┌───┘   ┌────┘
-          │    │        │       │       │        │      │       │
-          │    │ P0.4   │P0.0   │P0.2   │P0.8    │P0.19 │P0.7   │P0.20
-          │    │(GPIO)  │P0.1   │P0.3   │-P0.17  │(GPIO)│EINT2  │EINT3
-          │    │        │(UART0)│(I2C0) │(GPIO)  │      │       │
-          │    │        │       │       │        │      │       │
-   ┌──────▼──┐ │  ┌─────▼──┐ ┌─▼────┐ ┌▼──────┐ │ ┌────▼──┐ ┌──▼───┐
-   │         │ │  │        │ │      │ │       │ │ │       │ │      │
-   │  DHT11  │ │  │ ESP-01 │ │ AT24 │ │ 16x2  │ │ │ Reed  │ │ Menu │
-   │         │ │  │ESP8266 │ │ C256 │ │  LCD  │ │ │Switch │ │Button│
-   │  Temp   │ │  │        │ │      │ │       │ │ │       │ │      │
-   │  Humid  │ │  │  Wi-Fi │ │EEPROM│ │HD44780│ │ │ Door  │ │Config│
-   │  Sensor │ │  │ Module │ │      │ │       │ │ │Sensor │ │Access│
-   └─────────┘ │  └───┬────┘ └──────┘ └───────┘ │ └───────┘ └──────┘
-               │      │                         │
-               │      │ HTTP GET                │
-         ┌─────▼────┐ │ port 80          ┌──────▼──────┐
-         │  4 x 4   │ │                  │   Active    │
-         │  Matrix  │ ▼                  │   Buzzer    │
-         │  Keypad  │                    │  (Piezo)    │
-         │          │ ┌─────────────┐    └─────────────┘
-         │ P1.16-23 │ │ ThingSpeak  │
-         └──────────┘ │   Cloud     │
-                      │             │
-                      │ ┌─────────┐ │
-                      │ │ field1: │ │
-                      │ │  Temp   │ │
-                      │ │ field2: │ │
-                      │ │ Humid   │ │
-                      │ │ field3: │ │
-                      │ │  Door   │ │
-                      │ │ field4: │ │
-                      │ │ Alarm   │ │
-                      │ └─────────┘ │
-                      └─────────────┘
-```
+<img src="images/circuit_block_diagram.png" alt="Circuit Block Diagram" width="700"/>
 
 ### Data Flow Summary
 
-```
-┌──────────────┐    Single-Wire     ┌────────────┐     In-place      ┌──────────┐
-│   DHT11      │ ──────────────────►│            │ ───────────────►  │  16×2    │
-│  (Temp/RH)   │    every 1 sec     │            │    overwrite      │   LCD    │
-└──────────────┘                    │            │                   └──────────┘
-                                    │  LPC2148   │
-┌──────────────┐    EINT2 (IRQ)     │  ARM7 MCU  │     GPIO HIGH     ┌──────────┐
-│ Door Switch  │ ──────────────────►│            │ ───────────────►  │  Buzzer  │
-└──────────────┘    edge-trigger    │            │   on alarm/door   └──────────┘
-                                    │            │
-┌──────────────┐    Row/Col Scan    │            │   UART0 + AT      ┌──────────┐
-│  4×4 Keypad  │ ──────────────────►│            │ ───────────────►  │  ESP-01  │──► ThingSpeak
-└──────────────┘                    │            │   every 60 sec    └──────────┘
-                                    │            │
-┌──────────────┐    EINT3 (IRQ)     │            │   I2C0 R/W        ┌──────────┐
-│ Menu Button  │ ──────────────────►│            │ ◄──────────────►  │ AT24C256 │
-└──────────────┘                    └────────────┘                   └──────────┘
-```
+<img src="images/data_flow_summary.png" alt="Data Flow Summary" width="700"/>
 
 ### Interrupt Map
 
@@ -470,32 +383,7 @@ The LPC2148 clock tree is configured in `Startup.s` and `main.c`:
 
 The firmware follows a **modular driver architecture** — each peripheral has its own `.c`/`.h` pair with a clean public API:
 
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                          APPLICATION LAYER                              │
-│                                                                         │
-│   main.c ── Init_All() → Main Loop (sensor → display → alarm → cloud)   │
-│                                                                         │
-├──────────────┬──────────────┬──────────────┬────────────────────────────┤
-│   MIDDLEWARE │              │              │                            │
-│              │              │              │                            │
-│  password.c  │   menu.c     │  logger.c    │  app_config.h (struct)     │
-│  (PIN gate)  │  (settings)  │ (UART debug) │  config.h (constants)      │
-│              │              │              │                            │
-├──────────────┴──────────────┴──────────────┴────────────────────────────┤
-│                           DRIVER LAYER                                  │
-│                                                                         │
-│  dht11.c   lcd.c    uart0.c   esp01.c   eeprom.c   i2c.c   keypad.c     │
-│  buzzer.c  door_interrupt.c   delay.c   rtc.c                           │
-│                                                                         │
-├─────────────────────────────────────────────────────────────────────────┤
-│                           HARDWARE LAYER                                │
-│                                                                         │
-│  Startup.s (PLL, MAM, stack init)   │   LPC214x.h (register map)        │
-│  defines.h (SETBIT, CLRBIT macros)  │   types.h (u8, u16, s16, u32)     │
-│                                                                         │
-└─────────────────────────────────────────────────────────────────────────┘
-```
+<img src="images/software_architecture.png" alt="Software Architecture" width="700"/>
 
 ### Source File Reference
 
@@ -520,53 +408,7 @@ The firmware follows a **modular driver architecture** — each peripheral has i
 
 ### Main Loop State Machine
 
-```
-    ┌─────────────────────────────────────────────────────────────┐
-    │                     BOOT SEQUENCE                           │
-    │                                                             │
-    │  SystemClock_Init()  →  Timer0_Init()  →  UART0_Init()      │
-    │  LCD_Init()  →  Buzzer_Init()  →  Keypad_Init()             │
-    │  EEPROM_Init() + LoadConfig()  →  DHT11_Init() (1.2s)       │
-    │  ESP01_Init() (AT+RST, CWJAP)  →  DoorInterrupt_Init()      │
-    │                                                             │
-    │  LCD shows: "ColdGuard" → "Running..."                      │
-    └─────────────────────────┬───────────────────────────────────┘
-                              │
-                              ▼
-    ╔═════════════════════════════════════════════════════════════╗
-    ║                      MAIN LOOP                              ║
-    ║                                                             ║
-    ║  ┌─── 1. EINT3 Menu? ──► Password_Verify → Menu_Run()       ║
-    ║  │                                                          ║
-    ║  ├─── 2. Keypad poll (flush buffer)                         ║
-    ║  │                                                          ║
-    ║  ├─── 3. DHT11_Read()                                       ║
-    ║  │       ├── Success → update temp & humidity               ║
-    ║  │       ├── Fail ≤3 → "Retrying..." + 1s delay             ║
-    ║  │       └── Fail >3 → use last known value                 ║
-    ║  │                                                          ║
-    ║  ├─── 4. DisplayMonitorScreen()                             ║
-    ║  │       Line 1: "T:24°C/35 H:58%"                          ║
-    ║  │       Line 2: "Door:Closed" or "Door:Open T Xs"          ║
-    ║  │                                                          ║
-    ║  ├─── 5. HandleSensorAlarms()                               ║
-    ║  │       alarmCode: bit0=temp, bit1=humidity                ║
-    ║  │       → Buzzer_On() if any threshold exceeded            ║
-    ║  │                                                          ║
-    ║  ├─── 6. HandleDoorLogic(1000ms)                            ║
-    ║  │       ├── Door open <15s → LCD countdown                 ║
-    ║  │       ├── Door open ≥15s → "DOOR >15s ALERT" + buzzer    ║
-    ║  │       └── Door closes after ≥15s → send ThingSpeak       ║
-    ║  │           (field3=1, wait 16s, field3=0)                 ║
-    ║  │                                                          ║
-    ║  ├─── 7. ThingSpeak periodic upload (every 60s)             ║
-    ║  │       ESP01_SendUpdate(temp, humidity, door, alarm)      ║
-    ║  │                                                          ║
-    ║  └─── 8. Wait 1s (50ms chunks, interruptible by EINT3)      ║
-    ║                                                             ║
-    ║  ◄─────────────────── REPEAT ──────────────────────────►    ║
-    ╚═════════════════════════════════════════════════════════════╝
-```
+<img src="images/main_loop_state_machine.png" alt="Main Loop State Machine" width="700"/>
 
 ---
 
@@ -594,26 +436,7 @@ Host: api.thingspeak.com
 
 When the door is held open **longer than 15 seconds**, ColdGuard sends **two sequential updates** to enable open-duration calculation on ThingSpeak:
 
-```
-    Time ──────────────────────────────────────────────────────►
-
-    Door opens              15s threshold           Door closes
-        │                        │                       │
-        │    countdown on LCD    │   ALERT + buzzer      │
-        │◄──────────────────────►│◄─────────────────────►│
-        │                        │                       │
-                                 │                       │
-                         ┌───────▼────────┐      ┌───────▼────────┐
-                         │ ThingSpeak #1  │      │ ThingSpeak #2  │
-                         │ field3 = 1     │      │ field3 = 0     │
-                         │ (Door Open)    │      │ (Door Closed)  │
-                         │ timestamp = T₁ │      │ timestamp = T₂ │
-                         └────────────────┘      └────────────────┘
-                                                        │
-                              ◄── 16s gap ──►           │
-                                                        │
-                         Open Duration = T₂ − T₁ (calculated on ThingSpeak)
-```
+<img src="images/door_event_protocol.png" alt="Door Event Protocol (Dual-Timestamp)" width="700"/>
 
 ---
 
@@ -621,44 +444,7 @@ When the door is held open **longer than 15 seconds**, ColdGuard sends **two seq
 
 The 16×2 LCD shows different screens depending on system state:
 
-### Normal Monitoring
-```
-╔══════════════════╗
-║ T:24°C/35 H:58%  ║  ← actual temp / setpoint / humidity
-║ Door:Closed      ║  ← door status
-╚══════════════════╝
-```
-
-### Door Open — Countdown Active
-```
-╔══════════════════╗
-║ T:24°C/35 H:58%  ║
-║ Door:Open T 12s  ║  ← seconds remaining until alert
-╚══════════════════╝
-```
-
-### Door Alert — Timeout Exceeded
-```
-╔══════════════════╗
-║ T:24°C/35 H:58%  ║
-║ DOOR >15s ALERT  ║  ← buzzer ON, alert active
-╚══════════════════╝
-```
-
-### DHT11 Error — Using Last Value
-```
-╔══════════════════╗
-║ DHT11 Err(last)  ║  ← sensor failed, using cached value
-║ Door:Closed      ║
-╚══════════════════╝
-```
-
-### Boot Sequence Screens
-```
-"ColdGuard"          "Config Loaded"     "DHT11 Sensor"     "ColdGuard"
-"Initialising..."    "From EEPROM"       "Ready"             "Running..."
-     ↓ 800ms              ↓ 700ms             ↓ 400ms             ↓ 600ms
-```
+<img src="images/lcd_display_states.png" alt="LCD Display States" width="700"/>
 
 ---
 
@@ -709,24 +495,7 @@ All user-adjustable settings are defined in [`config.h`](config.h):
 
 The configuration menu is hardware-gated behind an external interrupt and software-gated behind a PIN:
 
-```
-┌──────────────┐     EINT3        ┌──────────────────┐     PIN OK      ┌─────────────────┐
-│  Menu Button │ ────────────────►│  Password Entry  │ ──────────────► │  Config Menu    │
-│   (P0.20)    │   falling-edge   │  (4-digit PIN    │   verified      │                 │
-└──────────────┘                  │   via keypad)    │                 │  1. Temp SP     │
-                                  └────────┬─────────┘                 │  2. Humid SP    │
-                                           │                           │  3. Password    │
-                                      PIN wrong                        └────────┬────────┘
-                                     (≤3 tries)                                 │
-                                           │                              Changes saved
-                                           ▼                              to EEPROM
-                                  ┌────────────────┐                    immediately
-                                  │"Wrong Password"│
-                                  │  retry / lock  │
-                                  └────────────────┘
-
-    After >3 wrong attempts → system locks out and returns to monitoring mode.
-```
+<img src="images/menu_password_system.png" alt="Menu & Password System" width="700"/>
 
 ### Menu Options
 
