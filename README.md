@@ -1,4 +1,4 @@
-﻿<p align="center">
+<p align="center">
   <img src="https://img.shields.io/badge/MCU-LPC2148-blue?style=for-the-badge&logo=arm&logoColor=white" alt="MCU Badge"/>
   <img src="https://img.shields.io/badge/Sensor-DHT11-green?style=for-the-badge" alt="Sensor Badge"/>
   <img src="https://img.shields.io/badge/WiFi-ESP--01-orange?style=for-the-badge&logo=espressif&logoColor=white" alt="WiFi Badge"/>
@@ -105,8 +105,6 @@ Built on the **NXP LPC2148 ARM7TDMI-S** microcontroller, ColdGuard provides:
 
 > *Complete ColdGuard hardware assembly showing the LPC2148 development board with all peripheral modules connected — DHT11 sensor, ESP-01 Wi-Fi module, 16×2 LCD, 4×4 keypad, buzzer, door switch, and EEPROM.*
 
-<!-- 📌 INSTRUCTION: Replace the path below with your actual hardware board image -->
-<!-- Example: ![Hardware Board](images/hardware_board.jpg) -->
 <img src="images/hardware_board.jpeg" alt="Full Hardware Board" width="700"/>
 
 ---
@@ -115,8 +113,6 @@ Built on the **NXP LPC2148 ARM7TDMI-S** microcontroller, ColdGuard provides:
 
 > *ColdGuard running in monitoring mode — LCD shows real-time temperature, humidity, setpoint values, and door status.*
 
-<!-- 📌 INSTRUCTION: Replace the path below with your actual display image -->
-<!-- Example: ![LCD Display](images/lcd_display.jpg) -->
 <img src="images/display.jpeg" alt="LCD Display Output" width="700"/>
 
 ---
@@ -125,7 +121,6 @@ Built on the **NXP LPC2148 ARM7TDMI-S** microcontroller, ColdGuard provides:
 
 > *Live ThingSpeak channel showing real-time graphs for temperature (field1), humidity (field2), door status (field3), and alarm code (field4) — data uploaded every 60 seconds via the ESP-01 Wi-Fi module.*
 
-<!-- 📌 INSTRUCTION: Save your ThingSpeak dashboard screenshot as:  images/thingspeak_dashboard.png  then push to GitHub -->
 <img src="images/thingspeak_dashboard.png" alt="ThingSpeak Dashboard" width="700"/>
 
 ---
@@ -159,20 +154,7 @@ Built on the **NXP LPC2148 ARM7TDMI-S** microcontroller, ColdGuard provides:
 
 The LPC2148 clock tree is configured in `Startup.s` and `main.c`:
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    CLOCK CONFIGURATION                      │
-├─────────────────────────────────────────────────────────────┤
-│  Crystal (FOSC)    │  12 MHz  (external HC49 quartz)        │
-│  PLL Multiplier    │  M = 5   (PLLCFG bits [4:0])           │
-│  PLL Divider       │  P = 2   (PLLCFG bits [6:5])           │
-│  System Clock      │  CCLK = 12 × 5 = 60 MHz                │
-│  VPB Divider       │  VPBDIV = 0x00 → PCLK = CCLK / 4       │
-│  Peripheral Clock  │  PCLK = 15 MHz                         │
-│  UART Baud Rate    │  9600 → Divisor = 15M / (16×9600) = 97 │
-│  MAM               │  Fully enabled (MAMCR=2, MAMTIM=4)     │
-└─────────────────────────────────────────────────────────────┘
-```
+<img src="images/System Clock Configuration.png" alt="System Clock Configuration" width="700"/>
 
 ---
 
@@ -216,149 +198,6 @@ The LPC2148 clock tree is configured in `Startup.s` and `main.c`:
 
 ---
 
-### 🔌 Individual Module Wiring
-
-<details>
-<summary><strong>🌡️ DHT11 Temperature & Humidity Sensor</strong></summary>
-
-```
-      DHT11                   LPC2148
-    ┌─────────┐
-    │  VCC    │──────────────── +5V
-    │  DATA   │──────┬──────── P0.4 (GPIO, bi-directional)
-    │  NC     │      │
-    │  GND    │──┐   │ 4.7kΩ
-    └─────────┘  │   │ pull-up
-                 │   │
-                GND  +5V
-```
-
-> **Protocol:** Single-wire, host-initiated. MCU pulls DATA low for 18 ms, then reads 40-bit response (8-bit humidity integer + 8-bit humidity decimal + 8-bit temp integer + 8-bit temp decimal + 8-bit checksum). All interrupts disabled during read for microsecond timing accuracy.
-
-</details>
-
-<details>
-<summary><strong>📡 ESP-01 (ESP8266) Wi-Fi Module</strong></summary>
-
-```
-      ESP-01                  LPC2148 / Power
-    ┌─────────┐
-    │  VCC    │──────────────── +3.3V (AMS1117 regulated)
-    │  GND    │──────────────── GND
-    │  CH_PD  │──────────────── +3.3V (chip enable, must be HIGH)
-    │  TX     │──────────────── P0.1 (UART0 RX) [via voltage divider]
-    │  RX     │──────────────── P0.0 (UART0 TX) [via voltage divider]
-    │  GPIO0  │──────────────── +3.3V (normal run mode)
-    │  GPIO2  │──────────────── (floating / not connected)
-    │  RST    │──────┬──────── +3.3V
-    └─────────┘      │
-                   10kΩ pull-up
-```
-
-> ⚠️ **CRITICAL:** The ESP-01 operates at **3.3V logic**. The LPC2148 GPIO is 5V. Use a resistor voltage divider (1 kΩ + 2 kΩ) or a bi-directional logic level converter on the TX/RX lines to prevent damage.
-
-> **Communication:** AT-command firmware at 9600 baud. Commands: `AT+CWJAP` (join AP), `AT+CIPSTART` (TCP connect), `AT+CIPSEND` (send data). HTTP GET to `api.thingspeak.com:80`.
-
-</details>
-
-<details>
-<summary><strong>💾 AT24C256 EEPROM (I2C)</strong></summary>
-
-```
-    AT24C256                  LPC2148
-    ┌─────────┐
-    │  VCC    │──────────────── +5V
-    │  GND    │──────────────── GND
-    │  SCL    │──────┬──────── P0.2 (I2C0 SCL, open-drain)
-    │  SDA    │──┬   │         P0.3 (I2C0 SDA, open-drain)
-    │  A0     │──┤   │ 4.7kΩ
-    │  A1     │──┤  GND pull-ups
-    │  A2     │──┤   to +5V
-    │  WP     │──┘
-    └─────────┘
-    A0=A1=A2=GND → I2C address = 0xA0 (write) / 0xA1 (read)
-    WP = GND → Write protection disabled
-```
-
-> **Usage:** Stores `SystemConfig` struct — temperature setpoint (s16), humidity setpoint (u8), password length (u8), password string (5 bytes). Magic byte at address 0x0000 validates data integrity.
-
-</details>
-
-<details>
-<summary><strong>📟 16×2 Character LCD (HD44780, 8-bit mode)</strong></summary>
-
-```
-    LCD Pin    Signal           LPC2148 / Power
-    ──────────────────────────────────────────
-    Pin 1      VSS (GND)       GND
-    Pin 2      VDD (+5V)       +5V
-    Pin 3      VO  (Contrast)  10kΩ pot wiper → GND
-    Pin 4      RS              P0.16 (0=CMD, 1=DATA)
-    Pin 5      RW              GND (write-only mode)
-    Pin 6      EN              P0.17 (pulse HIGH→LOW to latch)
-    Pin 7      D0              P0.8
-    Pin 8      D1              P0.9
-    Pin 9      D2              P0.10
-    Pin 10     D3              P0.11
-    Pin 11     D4              P0.12
-    Pin 12     D5              P0.13
-    Pin 13     D6              P0.14
-    Pin 14     D7              P0.15
-    Pin 15     BL Anode (+)    +5V via 100Ω current-limit resistor
-    Pin 16     BL Cathode (-)  GND
-```
-
-</details>
-
-<details>
-<summary><strong>⌨️ 4×4 Matrix Keypad</strong></summary>
-
-```
-    Keypad Layout:
-    ┌─────┬─────┬─────┬─────┐
-    │  1  │  2  │  3  │  A  │  ← Row 0 (P1.20)
-    ├─────┼─────┼─────┼─────┤
-    │  4  │  5  │  6  │  B  │  ← Row 1 (P1.21)
-    ├─────┼─────┼─────┼─────┤
-    │  7  │  8  │  9  │  C  │  ← Row 2 (P1.22)
-    ├─────┼─────┼─────┼─────┤
-    │  *  │  0  │  #  │  D  │  ← Row 3 (P1.23)
-    └─────┴─────┴─────┴─────┘
-       ↑     ↑     ↑     ↑
-     Col0  Col1  Col2  Col3
-    P1.16 P1.17 P1.18 P1.19
-
-    Scan method: Rows driven LOW one at a time;
-    Columns read with pull-ups (pressed key = LOW).
-```
-
-</details>
-
-<details>
-<summary><strong>🔔 Buzzer & 🚪 Door Switch & 📋 Menu Button</strong></summary>
-
-```
-    Active Buzzer (P0.19):
-    P0.19 ──── [Buzzer +] ──── GND
-    Drive: Active-HIGH (IOSET0 to activate, IOCLR0 to silence)
-
-    Door Reed Switch (P0.7 / EINT2):
-    P0.7 ────┬──── [Reed Switch] ──── GND
-             │
-           10kΩ pull-up to +3.3V
-    Trigger: Active-LOW, falling-edge external interrupt
-
-    Menu Push Button (P0.20 / EINT3):
-    P0.20 ───┬──── [Push Button] ──── GND
-             │
-           10kΩ pull-up to +3.3V
-    Trigger: Active-LOW, falling-edge external interrupt
-```
-
-</details>
-
----
-
 ## 🗺️ Circuit Block Diagram
 
 > **Complete system interconnection diagram showing all modules, communication buses, and data flow.**
@@ -384,27 +223,6 @@ The LPC2148 clock tree is configured in `Startup.s` and `main.c`:
 The firmware follows a **modular driver architecture** — each peripheral has its own `.c`/`.h` pair with a clean public API:
 
 <img src="images/software_architecture.png" alt="Software Architecture" width="700"/>
-
-### Source File Reference
-
-| File | Lines | Purpose |
-|------|:-----:|---------|
-| `main.c` | 406 | Application entry, Init_All(), main loop with 8 stages |
-| `config.h` | 105 | All hardware pins, clock settings, thresholds, credentials |
-| `dht11.c` / `.h` | — | Single-wire protocol: start signal, 40-bit read, checksum verify |
-| `lcd.c` / `.h` | — | HD44780 init, command/data write, goto, print string/int |
-| `uart0.c` / `.h` | — | UART0 init (9600 baud), TX/RX byte, TX string, RX with timeout |
-| `esp01.c` / `.h` | — | AT-command sequencer: CWJAP, CIPSTART, CIPSEND, HTTP GET builder |
-| `eeprom.c` / `.h` | — | I2C byte/page/buffer R/W, config load/save with magic-byte validation |
-| `i2c.c` / `.h` | — | I2C0 start, stop, write, read, ACK/NACK handling |
-| `keypad.c` / `.h` | — | Row scan, column read, debounce, key-to-char mapping |
-| `buzzer.c` / `.h` | — | Init pin direction, Buzzer_On(), Buzzer_Off() |
-| `door_interrupt.c` / `.h` | — | EINT2 ISR registration, Door_IsOpen() status read |
-| `password.c` / `.h` | — | Keypad-based 4-digit PIN entry, verification against EEPROM config |
-| `menu.c` / `.h` | — | Interactive LCD menu: temp/humidity setpoint, password change |
-| `delay.c` / `.h` | — | Timer0 match-based delay_us() and delay_ms() |
-| `logger.c` / `.h` | — | UART0 debug print (string, integer, hex) |
-| `Startup.s` | 489 | ARM7 vector table, PLL setup, MAM config, stack init, jump to main |
 
 ### Main Loop State Machine
 
@@ -619,68 +437,6 @@ coldguard/
     ├── major.axf                ← ELF executable
     └── major.map                ← Linker memory map
 ```
-
----
-
-## 🧠 Technical Deep-Dive
-
-<details>
-<summary><strong>How DHT11 Single-Wire Protocol Works</strong></summary>
-
-```
-MCU Start Signal:
-    MCU pulls DATA low for 18 ms → releases (pull-up goes HIGH)
-
-DHT11 Response:
-    DHT11 pulls low 80 µs → high 80 µs (ACK)
-
-40-bit Data Transmission:
-    Each bit: 50 µs LOW (start) + 26-28 µs HIGH (bit=0) or 70 µs HIGH (bit=1)
-
-    Byte order: [Humid_Int] [Humid_Dec] [Temp_Int] [Temp_Dec] [Checksum]
-    Checksum = Humid_Int + Humid_Dec + Temp_Int + Temp_Dec (lower 8 bits)
-```
-
-> **Important:** All interrupts are disabled during the DHT11 read to protect microsecond timing. This is why `DHT11_Read()` briefly blocks the system for ~4 ms.
-
-</details>
-
-<details>
-<summary><strong>EEPROM Memory Layout</strong></summary>
-
-```
-Address   Size    Field
-──────────────────────────────────
-0x0000    1 byte  Magic byte (0xA5 = valid config present)
-0x0001    2 bytes Temperature setpoint (s16, little-endian)
-0x0003    1 byte  Humidity setpoint (u8)
-0x0004    1 byte  Password length (u8)
-0x0005    5 bytes Password string (null-terminated)
-──────────────────────────────────
-Total:    10 bytes per config block
-```
-
-If the magic byte is not `0xA5` on boot, `EEPROM_LoadConfig()` writes factory defaults and returns `0` (false).
-
-</details>
-
-<details>
-<summary><strong>ESP-01 AT Command Sequence</strong></summary>
-
-```
-Boot:
-    AT+RST                          → Reset module
-    AT+CWMODE=1                     → Station mode
-    AT+CWJAP="SSID","PASSWORD"      → Join access point
-
-Each Update (every 60s):
-    AT+CIPSTART="TCP","api.thingspeak.com",80
-    AT+CIPSEND=<length>
-    GET /update?api_key=<KEY>&field1=<T>&field2=<H>&field3=<D>&field4=<A>\r\n\r\n
-    AT+CIPCLOSE
-```
-
-</details>
 
 ---
 
