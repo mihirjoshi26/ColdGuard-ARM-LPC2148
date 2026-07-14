@@ -16,33 +16,13 @@
 
 ---
 
-## 📌 Table of Contents
-
-| # | Section | Description |
-|---|---------|-------------|
-| 1 | [Project Overview](#-project-overview) | What ColdGuard does and why |
-| 2 | [Features](#-features) | Complete feature list |
-| 3 | [Project Images](#-project-images) | Hardware board, display & ThingSpeak dashboard photos |
-| 4 | [Hardware Components](#-hardware-components) | Full Bill of Materials |
-| 5 | [Circuit Details & Pin Connections](#-circuit-details--pin-connections) | Pinout, clock, wiring diagrams |
-| 6 | [Circuit Block Diagram](#-circuit-block-diagram) | Visual system architecture |
-| 7 | [Software Architecture](#-software-architecture) | Code structure & main loop flow |
-| 8 | [ThingSpeak IoT Dashboard](#-thingspeak-iot-dashboard) | Cloud data fields & protocol |
-| 9 | [LCD Display States](#-lcd-display-states) | All display screen layouts |
-| 10 | [System Configuration](#-system-configuration) | Configurable parameters |
-| 11 | [Menu & Password System](#-menu--password-system) | Secure settings access |
-| 12 | [Build & Flash Instructions](#-build--flash-instructions) | How to compile and deploy |
-| 13 | [File Structure](#-file-structure) | Source code organization |
-
----
-
 ## 📖 Project Overview
 
-**ColdGuard** is an embedded systems major project designed to solve a critical real-world problem: **unmonitored temperature and humidity excursions in cold storage facilities** can lead to spoilage of perishable goods, pharmaceutical degradation, and significant financial losses.
+**ColdGuard** is an embedded systems major project designed to solve a critical real-world problem: **unmonitored temperature and relative humidity excursions in cold storage facilities** can lead to spoilage of perishable goods, pharmaceutical degradation, and significant financial losses.
 
 Built on the **NXP LPC2148 ARM7TDMI-S** microcontroller, ColdGuard provides:
 
-- ✅ **Continuous environmental monitoring** (temperature + humidity)
+- ✅ **Continuous environmental monitoring** (temperature + relative humidity)
 - ✅ **Instant local alerts** via buzzer when thresholds are exceeded
 - ✅ **Door-open tracking** with countdown timer and configurable timeout
 - ✅ **Cloud-based remote monitoring** via ThingSpeak IoT dashboard
@@ -55,7 +35,7 @@ Built on the **NXP LPC2148 ARM7TDMI-S** microcontroller, ColdGuard provides:
 |-----------|---------------|
 | **Microcontroller** | NXP LPC2148 — ARM7TDMI-S core, 60 MHz, 512 KB Flash, 32+8 KB SRAM |
 | **Temperature Sensor** | DHT11 — Range: 0–50 °C, Accuracy: ±2 °C, Resolution: 1 °C |
-| **Humidity Sensor** | DHT11 — Range: 20–90 %RH, Accuracy: ±5 %RH |
+| **Relative Humidity Sensor** | DHT11 — Range: 20–90 %RH, Accuracy: ±5 %RH |
 | **Display** | 16×2 Character LCD — HD44780 controller, 8-bit parallel interface |
 | **Wi-Fi Module** | ESP-01 (ESP8266) — 802.11 b/g/n, UART AT-command interface, 9600 baud |
 | **Non-volatile Storage** | AT24C256 — 256 Kbit I2C EEPROM, 64-byte page write |
@@ -73,20 +53,20 @@ Built on the **NXP LPC2148 ARM7TDMI-S** microcontroller, ColdGuard provides:
 | Feature | Description |
 |---------|-------------|
 | 🌡️ **Temperature Monitoring** | DHT11 sensor sampled every 1 second with configurable setpoint (0–50 °C) |
-| 💧 **Humidity Monitoring** | Simultaneous humidity tracking with configurable setpoint (20–90 %RH) |
+| 💧 **Relative Humidity Monitoring** | Simultaneous relative humidity tracking with configurable setpoint (20–90 %RH) |
 | 📟 **Live LCD Dashboard** | Live sensor feed: `T:24°C    RH:58%` — full-width justified, no clear-and-redraw flicker |
 
 ### Alert & Safety
 | Feature | Description |
 |---------|-------------|
-| 🔔 **Threshold Alarms** | Buzzer activates immediately when temperature OR humidity exceeds setpoint |
+| 🔔 **Threshold Alarms** | Buzzer activates immediately when temperature OR relative humidity exceeds setpoint |
 | 🚪 **Door Open Detection** | External interrupt (EINT2) detects door state via magnetic reed switch |
 | ⏱️ **Door Countdown Timer** | LCD shows live countdown; buzzer sounds if door stays open > 15 seconds |
 
 ### IoT & Cloud
 | Feature | Description |
 |---------|-------------|
-| ☁️ **ThingSpeak Upload** | Temperature, humidity, door status, and alarm code pushed every 60 seconds |
+| ☁️ **ThingSpeak Upload** | Temperature, relative humidity, door status, and alarm code pushed every 60 seconds |
 | 📊 **Remote Dashboard** | View live graphs and historical trends from any browser or phone |
 | 🚨 **Door Event Logging** | Two-point door-open/close timestamps enable duration calculation on ThingSpeak |
 
@@ -94,7 +74,7 @@ Built on the **NXP LPC2148 ARM7TDMI-S** microcontroller, ColdGuard provides:
 | Feature | Description |
 |---------|-------------|
 | 🔒 **Password Protection** | 4-digit PIN required to access configuration menu (max 3 attempts before lockout) |
-| 💾 **EEPROM Persistence** | All settings (temp/humidity setpoints, password) survive power cycles |
+| 💾 **EEPROM Persistence** | All settings (temp/relative humidity setpoints, password) survive power cycles |
 | 🔁 **Fault Tolerance** | DHT11 auto-retries up to 3×; falls back to last known value on persistent failure |
 
 ---
@@ -111,7 +91,7 @@ Built on the **NXP LPC2148 ARM7TDMI-S** microcontroller, ColdGuard provides:
 
 ### 2. LCD Display Output
 
-> *ColdGuard running in monitoring mode — LCD shows live temperature, humidity, setpoint values, and door status.*
+> *ColdGuard running in monitoring mode — LCD shows live temperature, relative humidity, setpoint values, and door status.*
 
 <img src="images/display.jpeg" alt="LCD Display Output" width="700"/>
 
@@ -119,7 +99,7 @@ Built on the **NXP LPC2148 ARM7TDMI-S** microcontroller, ColdGuard provides:
 
 ### 3. ThingSpeak IoT Dashboard
 
-> *Live ThingSpeak channel showing continuous graphs for temperature (field1), humidity (field2), door status (field3), and alarm code (field4) — data uploaded every 60 seconds via the ESP-01 Wi-Fi module.*
+> *Live ThingSpeak channel showing continuous graphs for temperature (field1), relative humidity (field2), door status (field3), and alarm code (field4) — data uploaded every 60 seconds via the ESP-01 Wi-Fi module.*
 
 <img src="images/thingspeak_dashboard.png" alt="ThingSpeak Dashboard" width="700"/>
 
@@ -132,7 +112,7 @@ Built on the **NXP LPC2148 ARM7TDMI-S** microcontroller, ColdGuard provides:
 | # | Component | Model / Specification | Interface | Qty |
 |:-:|-----------|----------------------|-----------|:---:|
 | 1 | **Microcontroller** | NXP LPC2148 (ARM7TDMI-S, 60 MHz, 512 KB Flash, 32+8 KB SRAM) | — | 1 |
-| 2 | **Temp & Humidity Sensor** | DHT11 (0–50 °C / 20–90 %RH, single-wire protocol) | GPIO (P0.4) | 1 |
+| 2 | **Temp & Relative Humidity Sensor** | DHT11 (0–50 °C / 20–90 %RH, single-wire protocol) | GPIO (P0.4) | 1 |
 | 3 | **Character LCD** | 16×2 HD44780-compatible (8-bit parallel mode) | 8-bit GPIO | 1 |
 | 4 | **Wi-Fi Module** | ESP-01 (ESP8266, 802.11 b/g/n, AT-command firmware) | UART0 @ 9600 | 1 |
 | 5 | **EEPROM** | AT24C256 (256 Kbit, I2C, 64-byte page, 400 kHz) | I2C0 | 1 |
@@ -211,7 +191,7 @@ The LPC2148 clock tree is configured in `Startup.s` and `main.c`:
 ### Interrupt Map
 
 | Interrupt | Source | Pin | Trigger | Purpose |
-|-----------|--------|-----|---------|---------|
+|-----------|--------|-----|---------|---------| 
 | **EINT2** | Door reed switch | P0.7 | Falling edge (Active-LOW) | Wake main loop for door event |
 | **EINT3** | Menu push button | P0.20 | Falling edge (Active-LOW) | Enter configuration menu |
 | **Timer0** | Internal | — | Match register | Microsecond/millisecond delay generation |
@@ -239,9 +219,9 @@ Data is uploaded to **ThingSpeak** via HTTP GET requests through the ESP-01 Wi-F
 | Field | Data Type | Unit | Range | Description |
 |:-----:|-----------|:----:|-------|-------------|
 | `field1` | Temperature | °C | 0–50 | DHT11 integer temperature reading |
-| `field2` | Humidity | %RH | 20–90 | DHT11 integer relative humidity reading |
+| `field2` | Relative Humidity | %RH | 20–90 | DHT11 integer relative humidity reading |
 | `field3` | Door Status | flag | 0 / 1 | `1` = door-opened event, `0` = door-closed event |
-| `field4` | Alarm Code | enum | 0–3 | `0`=OK, `1`=Temp high, `2`=Humidity high, `3`=Both |
+| `field4` | Alarm Code | enum | 0–3 | `0`=OK, `1`=Temp high, `2`=Relative Humidity high, `3`=Both |
 
 ### HTTP Request Format
 
@@ -275,7 +255,7 @@ All user-adjustable settings are defined in [`config.h`](config.h):
 | Macro | Default | Range | Description |
 |-------|:-------:|:-----:|-------------|
 | `DEFAULT_TEMP_SETPOINT` | 35 °C | 0–50 | Temperature alarm trigger point |
-| `DEFAULT_HUMIDITY_SETPOINT` | 65 %RH | 20–90 | Humidity alarm trigger point |
+| `DEFAULT_HUMIDITY_SETPOINT` | 65 %RH | 20–90 | Relative humidity alarm trigger point |
 | `DOOR_OPEN_ALERT_SECONDS` | 15 s | — | Door open duration before alarm |
 | `SENSOR_SAMPLE_DELAY_MS` | 1000 ms | ≥1000 | DHT11 sample interval (min 1s per datasheet) |
 
@@ -294,89 +274,8 @@ All user-adjustable settings are defined in [`config.h`](config.h):
 |-------|---------|-------------|
 | `ESP_ENABLE` | 1 | Set to `0` to disable all Wi-Fi features |
 | `WIFI_SSID` | `"Mihir"` | Your Wi-Fi network name |
-| `WIFI_PASSWORD` | `"********"` | Your Wi-Fi password |
-| `THINGSPEAK_WRITE_API_KEY` | `"YOUR_KEY"` | ThingSpeak channel write API key |
 | `THINGSPEAK_HOST` | `"api.thingspeak.com"` | ThingSpeak API endpoint |
 | `THINGSPEAK_PORT` | 80 | HTTP port |
-
-### EEPROM
-
-| Macro | Default | Description |
-|-------|:-------:|-------------|
-| `EEPROM_FIRST_TIME_SETUP` | 0 | Set to `1` **once** for factory reset, then set back to `0` |
-
-> ⚠️ **Security Warning:** Before pushing to GitHub, move `WIFI_SSID`, `WIFI_PASSWORD`, and `THINGSPEAK_WRITE_API_KEY` to a separate `secrets.h` file and add it to `.gitignore`.
-
----
-
-## 🔒 Menu & Password System
-
-The configuration menu is hardware-gated behind an external interrupt and software-gated behind a PIN:
-
-<img src="images/menu_password_system.png" alt="Menu & Password System" width="700"/>
-
-### Menu Options
-
-| Option | Input Range | Stored In | Notes |
-|--------|:-----------:|-----------|-------|
-| Temperature Setpoint | 0 – 50 °C | EEPROM + RAM | Immediate effect on alarm logic |
-| Humidity Setpoint | 20 – 90 %RH | EEPROM + RAM | Immediate effect on alarm logic |
-| Change Password | 4 digits | EEPROM + RAM | New PIN required on next menu access |
-
----
-
-## 🛠️ Build & Flash Instructions
-
-### Prerequisites
-
-| Tool | Version | Purpose |
-|------|---------|---------|
-| **Keil µVision** | v4 or v5 (legacy pack) | IDE + ARM MDK compiler |
-| **LPC2148 Device Pack** | — | CMSIS headers + startup files |
-| **Flash Magic** | v14+ | ISP flash programming via UART |
-| *or* **Keil ULINK** | — | JTAG/SWD flash programming |
-
-### Step-by-Step Build & Deploy
-
-```
-Step 1: Clone Repository
-────────────────────────
-    $ git clone https://github.com/<your-username>/coldguard.git
-    $ cd coldguard
-
-Step 2: Configure Wi-Fi Credentials
-────────────────────────────────────
-    Open config.h and edit:
-    #define WIFI_SSID            "YourNetworkName"
-    #define WIFI_PASSWORD        "YourPassword"
-    #define THINGSPEAK_WRITE_API_KEY  "YourAPIKey"
-
-Step 3: Open in Keil µVision
-────────────────────────────
-    File → Open Project → major.uvproj
-
-Step 4: Build
-─────────────
-    Press F7 or Project → Build Target
-    Output: major.hex (in project root)
-    Expected: "0 Error(s), 0 Warning(s)"
-
-Step 5: Flash via ISP
-─────────────────────
-    Open Flash Magic:
-      Device     : LPC2148
-      COM Port   : COMx @ 9600 baud
-      Oscillator : 12 MHz
-      Hex File   : major.hex
-    → Click "Start" to program
-
-Step 6: First-Time EEPROM Setup (one-time only)
-───────────────────────────────────────────────
-    1. In config.h: set EEPROM_FIRST_TIME_SETUP to 1
-    2. Rebuild + Flash → writes factory defaults to EEPROM
-    3. IMMEDIATELY set EEPROM_FIRST_TIME_SETUP back to 0
-    4. Rebuild + Flash again for normal operation
-```
 
 ---
 
@@ -388,17 +287,17 @@ coldguard/
 ├── 📄 README.md                 ← This file
 │
 ├── 🖼️ images/                   ← Project photos & diagrams
-│   ├── hardware_board.jpeg             ← Full hardware assembly
-│   ├── display.jpeg                    ← LCD display output
-│   ├── thingspeak_dashboard.png        ← ThingSpeak channel UI
-│   ├── system_clock_configuration.png  ← PLL & clock tree block
-│   ├── circuit_block_diagram.png       ← Interconnection map
-│   ├── data_flow_summary.png           ← Data movement flow
-│   ├── software_architecture.png       ← Firmware layer diagram
-│   ├── main_loop_state_machine.png     ← Core execution loop
-│   ├── door_event_protocol.png         ← Event timing protocol
-│   ├── lcd_display_states.png          ← Screen layout maps
-│   └── menu_password_system.png        ← Security & config flowchart
+│   ├── hardware_board.jpeg
+│   ├── display.jpeg
+│   ├── thingspeak_dashboard.png
+│   ├── system_clock_configuration.png
+│   ├── circuit_block_diagram.png
+│   ├── data_flow_summary.png
+│   ├── software_architecture.png
+│   ├── main_loop_state_machine.png
+│   ├── door_event_protocol.png
+│   ├── lcd_display_states.png
+│   └── menu_password_system.png
 │
 ├── ⚙️ Core Application
 │   ├── main.c                   ← Entry point, Init_All(), main loop
@@ -408,7 +307,7 @@ coldguard/
 │   └── types.h                  ← Portable type aliases: u8, u16, u32, s16
 │
 ├── 🌡️ Sensor Drivers
-│   ├── dht11.c / dht11.h       ← DHT11 single-wire temperature & humidity
+│   ├── dht11.c / dht11.h       ← DHT11 single-wire temperature & relative humidity
 │   └── door_interrupt.c / .h   ← EINT2 ISR, Door_IsOpen() status
 │
 ├── 📟 Display
@@ -428,44 +327,11 @@ coldguard/
 ├── 🔔 Output
 │   └── buzzer.c / buzzer.h     ← Buzzer on/off control
 │
-├── 🔧 Utilities
-│   ├── delay.c / delay.h       ← Timer0-based microsecond/millisecond delays
-│   ├── logger.c / logger.h     ← UART debug print
-│   └── rtc.c / rtc.h           ← Real-time clock utilities
-│
-├── 🏗️ Build System
-│   ├── Startup.s               ← ARM7 startup assembly (PLL, MAM, stacks)
-│   ├── major.uvproj            ← Keil µVision project file
-│   ├── major.sct               ← Linker scatter file (memory layout)
-│   └── major.hex               ← Compiled firmware (ready to flash)
-│
-└── 📋 Build Artifacts (generated)
-    ├── *.o                      ← Object files
-    ├── *.crf                    ← Cross-reference files
-    ├── *.d                      ← Dependency files
-    ├── major.axf                ← ELF executable
-    └── major.map                ← Linker memory map
+└── 🔧 Utilities
+    ├── delay.c / delay.h       ← Timer0-based microsecond/millisecond delays
+    ├── logger.c / logger.h     ← UART debug print
+    └── rtc.c / rtc.h           ← Real-time clock utilities
 ```
-
----
-
-## 👨‍💻 Author
-
-**Mihir** — ARM Embedded Systems Major Project
-
-| | |
-|---|---|
-| **Project** | ColdGuard — IoT Cold Storage Monitor |
-| **Platform** | NXP LPC2148 (ARM7TDMI-S) |
-| **IDE** | Keil µVision4 |
-| **Cloud** | ThingSpeak IoT Platform |
-| **Language** | Embedded C (ANSI C89) |
-
----
-
-## 📄 License
-
-This project is developed for **academic purposes** as part of a Major Project in ARM Embedded Systems.
 
 ---
 
