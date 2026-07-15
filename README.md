@@ -89,7 +89,7 @@ Built on the **NXP LPC2148 ARM7TDMI-S** microcontroller, ColdGuard provides:
 
 ### 2. LCD Display Output
 
-<img src="images/display.jpeg" alt="LCD Display Output" width="700"/>
+<img src="images/display.png" alt="LCD Display Output" width="700"/>
 
 ---
 
